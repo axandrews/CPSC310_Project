@@ -122,7 +122,8 @@ def create_kNN_classifier(table):
     
     
     accuracies = {}
-    for k in range(1, 100, 6):
+    for k in range(3, 100, 6):
+        print("testing at k=%d" % k)
         predictions, actuals = [], [] 
         for i, fold in enumerate(folds):
             train = [instance for fold in folds[:i] for instance in fold] + [instance for fold in folds[i+1:] for instance in fold]
