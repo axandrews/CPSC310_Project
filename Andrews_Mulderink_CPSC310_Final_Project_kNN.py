@@ -106,8 +106,8 @@ def get_stratified_folds(table, k=10):
         Returns: folds, a list of tables which have an equal amount of each class. Latter folds
         may have one fewer per class.
     '''
-    table = copy.deepcopy(table)
-    
+#    table = copy.deepcopy(table)
+#    
     _, groups = utils.group_by(table, len(table[0])-1)
      
     folds = [[] for _ in range(k)]
@@ -130,7 +130,7 @@ def create_kNN_classifier(table):
             test, train = normalize_attributes(fold, train)
             for test_instance in test:
                 predictions.append(make_kNN_prediction(test_instance, train, k))
-            actuals.append(fold[-1])
+                actuals.append(test_instance[-1])
         correct = [predictions[i] == actuals[i] for i in range(len(predictions))]
         accuracies[k] = correct.count(True) / len(correct)
     
@@ -140,7 +140,10 @@ def create_kNN_classifier(table):
 def main():
     header, table = utils.open_csv_with_header("default_of_credit_card_clients.csv")
     
-    accuracies = create_kNN_classifier(table)
+#    header, table = utils.open_csv_with_header("auto-data-no-names.txt")
+    np.random.shuffle(table)
+    
+    accuracies = create_kNN_classifier(table[:200])
     print(accuracies)
 
 main()
