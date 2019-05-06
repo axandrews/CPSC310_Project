@@ -180,20 +180,22 @@ def create_kNN_classifier_vary_attributes(table, header, k, iterations=20, F=10)
     return accuracies
     
     
+def create_kNN_classifier_vary_weights(table, attributes, k): pass
+
+
 
 def main():
     header, table = utils.open_csv_with_header("default_of_credit_card_clients.csv")
     
 #    header, table = utils.open_csv_with_header("auto-data-no-names.txt")
     np.random.shuffle(table)
-    
-    accuracies = create_kNN_classifier_vary_k(table[:250])
+    table = table[:250]
+    accuracies = create_kNN_classifier_vary_k(table)
     print("Accuracies for variable k\n", accuracies)
     accuracies.sort(reverse=True)
     print("sorted", accuracies)
 
-    np.random.shuffle(table)
-    accuracies = create_kNN_classifier_vary_attributes(table[:250], header, accuracies[0][1], 20)
+    accuracies = create_kNN_classifier_vary_attributes(table, header, accuracies[0][1], 20)
     
     accuracies.sort(reverse=True)
     print("\nAccuracies for variable attribute subset\n", accuracies)
