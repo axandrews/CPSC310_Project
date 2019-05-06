@@ -122,13 +122,13 @@ def get_random_attribute_subset(table, header, num_values):
     '''
         Returns a copy table with a random columns removed
     '''
-    smaller_table = table.copy()
+    smaller_table = copy.deepcopy(table)
     num_attributes = len(smaller_table[0])
     indices_to_remove = random.sample(range(0, num_attributes-1), num_attributes-num_values) 
     indices_to_remove.sort(reverse=True)
-    for i in indices_to_remove:
-        for i, _ in enumerate(smaller_table):
-            del smaller_table[i] 
+    for c in indices_to_remove:
+        for r, _ in enumerate(smaller_table):
+            del smaller_table[r][c] 
         
     attributes_kept = [header[i] for i in range(num_attributes) if i not in indices_to_remove]
         
@@ -140,7 +140,7 @@ def create_kNN_classifier_vary_k(table):
     
     
     accuracies = []
-    for k in range(29, 65, 4):
+    for k in range(27, 89, 6):
         print("testing at k=%d" % k)
         predictions, actuals = [], [] 
         for i, fold in enumerate(folds):
@@ -164,7 +164,7 @@ def create_kNN_classifier_vary_attributes(table, header, k, iterations=20, F=10)
     
     accuracies = []
     for i in range(iterations):
-        print("testing random attribute set", i, "of", iterations)
+        print("testing random attribute set", i+1, "of", iterations)
         current_table, current_attribs = get_random_attribute_subset(table, header, F)
         folds = get_stratified_folds(current_table)
         predictions, actuals = [], []
@@ -193,9 +193,14 @@ def main():
     print("sorted", accuracies)
 
     np.random.shuffle(table)
-    accuracies = create_kNN_classifier_vary_attributes(table[:250], header, accuracies[0][1], 50)
+    accuracies = create_kNN_classifier_vary_attributes(table[:250], header, accuracies[0][1], 20)
     
     accuracies.sort(reverse=True)
     print("\nAccuracies for variable attribute subset\n", accuracies)
+
+    best_feature_set_indices = [header.index(x) for x in accuracies[0][1]]
+    print(best_feature_set_indices)
+
+
 
 main()
