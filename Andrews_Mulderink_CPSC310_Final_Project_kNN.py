@@ -11,6 +11,7 @@ import utils
 import numpy as np
 import math
 import copy
+import random
 
 
 
@@ -117,12 +118,29 @@ def get_stratified_folds(table, k=10):
     return folds
 
 
-def create_kNN_classifier(table):
+def get_random_attribute_subset(table, header, num_values):
+    '''
+        Returns a copy table with a random columns removed
+    '''
+    smaller_table = table.copy()
+    num_attributes = len(smaller_table[0])
+    indices_to_remove = random.sample(range(0, num_attributes-1), num_attributes-num_values) 
+    indices_to_remove.sort(reverse=True)
+    for i in indices_to_remove:
+        for i, _ in enumerate(smaller_table):
+            del smaller_table[i] 
+        
+    attributes_kept = [header[i] for i in range(num_attributes) if i not in indices_to_remove]
+        
+    return smaller_table, attributes_kept
+
+
+def create_kNN_classifier_vary_k(table):
     folds = get_stratified_folds(table)
     
     
-    accuracies = {}
-    for k in range(3, 100, 6):
+    accuracies = []
+    for k in range(29, 65, 4):
         print("testing at k=%d" % k)
         predictions, actuals = [], [] 
         for i, fold in enumerate(folds):
@@ -132,18 +150,52 @@ def create_kNN_classifier(table):
                 predictions.append(make_kNN_prediction(test_instance, train, k))
                 actuals.append(test_instance[-1])
         correct = [predictions[i] == actuals[i] for i in range(len(predictions))]
-        accuracies[k] = correct.count(True) / len(correct)
+        accuracies.append((correct.count(True) / len(correct), k))
     
-     
     return accuracies
    
+    
+def create_kNN_classifier_vary_attributes(table, header, k, iterations=20, F=10):
+    '''
+        k: nearest neighbors
+        iterations: number of random subsets of attributes tested
+        F: number of attributes per subset
+    '''
+    
+    accuracies = []
+    for i in range(iterations):
+        print("testing random attribute set", i, "of", iterations)
+        current_table, current_attribs = get_random_attribute_subset(table, header, F)
+        folds = get_stratified_folds(current_table)
+        predictions, actuals = [], []
+        for i, fold in enumerate(folds):
+            train = [instance for fold in folds[:i] for instance in fold] + [instance for fold in folds[i+1:] for instance in fold]
+            test, train = normalize_attributes(fold, train)
+            for test_instance in test:
+                predictions.append(make_kNN_prediction(test_instance, train, k))
+                actuals.append(test_instance[-1])
+        correct = [predictions[i] == actuals[i] for i in range(len(predictions))]
+        accuracies.append((correct.count(True) / len(correct), current_attribs))
+    
+    return accuracies
+    
+    
+
 def main():
     header, table = utils.open_csv_with_header("default_of_credit_card_clients.csv")
     
 #    header, table = utils.open_csv_with_header("auto-data-no-names.txt")
     np.random.shuffle(table)
     
-    accuracies = create_kNN_classifier(table[:200])
-    print(accuracies)
+    accuracies = create_kNN_classifier_vary_k(table[:250])
+    print("Accuracies for variable k\n", accuracies)
+    accuracies.sort(reverse=True)
+    print("sorted", accuracies)
+
+    np.random.shuffle(table)
+    accuracies = create_kNN_classifier_vary_attributes(table[:250], header, accuracies[0][1], 50)
+    
+    accuracies.sort(reverse=True)
+    print("\nAccuracies for variable attribute subset\n", accuracies)
 
 main()
