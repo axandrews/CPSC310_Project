@@ -200,6 +200,14 @@ def normalize_attributes(test_set, training_set):
 
 
 def make_kNN_prediction(test_instance, training_set, k):
+    '''
+        Makes a prediction for a test instance given a training set and a k
+        For binary classification problems
+        Param test_instance: The instance to predict the class value of 
+        Param training_set: The instances to find nearest neighbors within
+        Param k: The number of nearest neighbors to check
+        Returns the majority class label 
+    '''
     closest = get_k_closest(test_instance, training_set, k)
     class_labels = get_column(closest, -1)
     return np.median(class_labels)  # the most common of the two class labels will be the median
@@ -267,3 +275,12 @@ def get_stratified_folds(table, k=10):
          for i, instance in enumerate(group):
              folds[i % k].append(instance)
     return folds
+
+
+def remove_column(table, column):
+    '''
+        Removes a column by index from a table
+    '''
+    for i, row in enumerate(table):
+        del table[i][column]
+    return table
