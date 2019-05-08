@@ -281,6 +281,6 @@ def remove_column(table, column):
     '''
         Removes a column by index from a table
     '''
-    for i, row in enumerate(table):
+    for i, _ in enumerate(table):
         del table[i][column]
     return table
